@@ -32,9 +32,17 @@ const appointmentSchema = mongoose.Schema({
   date : { type : Date, required : true }
 })
 
+const medicalCertificateSchema = mongoose.Schema({
+  name : { type : String, required : true },
+  file : { type : Buffer, required : true },
+  contentType : { type : String }
+}, { timestamps : true })
 
 
+
+const Certificate = mongoose.model('Certificate', medicalCertificateSchema)
 const Appointment = mongoose.model('Appointment', appointmentSchema)
-const appointmentRequest = mongoose.model('appointmentRequest', appointmentRequestSchema)
+const appointmentRequest = mongoose.model('appointment request', appointmentRequestSchema)
 const User = mongoose.model('User', userSchema);
-export default { User, appointmentRequest, Appointment };
+
+export default { User, appointmentRequest, Appointment, Certificate };
