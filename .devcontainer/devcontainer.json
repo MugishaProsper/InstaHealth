@@ -20,7 +20,7 @@
     "eslint.format.enable": true,
     "typescript.validate.enable": true
   },
-  "forwardPorts": [3000, 3001],
+  "forwardPorts": [3000, 3001, 5000],
   "features": {
     "ghcr.io/devcontainers/features/docker-in-docker:1": {
       "version": "latest"
