@@ -1,0 +1,29 @@
+{
+  "name": "InstaHealth DevContainer",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:0-18",
+  "postCreateCommand": "npm install && cd client && npm install",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "eamodio.gitlens",
+        "ms-vscode.vscode-typescript-next",
+        "streetsidesoftware.code-spell-checker",
+        "formulahendry.auto-rename-tag",
+        "usernamehw.errorlens"
+      ]
+    }
+  },
+  "settings": {
+    "editor.formatOnSave": true,
+    "eslint.format.enable": true,
+    "typescript.validate.enable": true
+  },
+  "forwardPorts": [3000, 3001, 5000],
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:1": {
+      "version": "latest"
+    }
+  }
+}
