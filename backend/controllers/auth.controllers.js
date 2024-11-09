@@ -1,4 +1,4 @@
-import User from '../models/user.models.js';
+import { User } from '../models/user.models.js';
 import bcrypt from 'bcryptjs'
 import { generateTokenAndSetCookie } from '../plugins/generate.token.js';
 
@@ -31,19 +31,24 @@ export const login = async (req, res) => {
   const { email, password } = req.body;
   try {
     const user = await User.findOne({ email });
-    if(!user){
-      res.status(404).json({ message : 'No user with such email' });
+    if (!user) {
+      return res.status(404).json({ message: 'No user with such email' }); // Added return to prevent further execution
     }
+
     const isPasswordMatching = await bcrypt.compare(password, user.password);
-    if(!isPasswordMatching){
-      res.status(404).json({ message : 'Incorrect password' });
+    if (!isPasswordMatching) {
+      return res.status(401).json({ message: 'Incorrect password' }); // Changed to 401 Unauthorized and added return
     }
-    generateTokenAndSetCookie(user._id, res);
-    res.status(200).json({ message : 'Login successfull', user });
+
+    generateTokenAndSetCookie(user._id, res); // Make sure this function is defined and error-handled
+    return res.status(200).json({ message: 'Login successful', user }); // Added return to avoid potential issues
+
   } catch (error) {
-    console.error(error.message);
+    console.error("Error during login:", error.message);
+    res.status(500).json({ message: "Server error" }); // Added response for server error
   }
 };
+
 
 export const logout = (req, res) => {
   try{
