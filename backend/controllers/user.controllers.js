@@ -63,4 +63,37 @@ export const fetchAppointments = async (req, res) => {
     console.log("Error fetching appointments : ", error);
     res.status(500).json({ message : "Server error" });
   }
+};
+
+export const profileCompletionStatus = async (req, res) => {
+  const requestingUser = req.user._id;
+  try {
+    const user = await User.findOne(requestingUser);
+    if(!user){
+      return res.status(404).json({ message: "Invalid user" })
+    }
+    let profileStatusCount = 0;
+    let role = user.role;
+    if(role == 'doctor'){
+      if(user.medicalCertificate != null){
+        profileStatusCount += 1;
+      };
+      if(user.License != null){
+        profileStatusCount += 1;
+      }
+      if(user.isVerified == true){
+        profileStatusCount += 1;
+      };
+      return res.status(200).json({ profileStatus : (profileStatusCount*100)/3 })
+    }else if(role == 'patient'){
+      if(user.isVerified == true){
+        profileStatusCount += 1;
+      };
+      if(user.insurance != null){
+        profileStatusCount += 1;
+      } 
+    }
+  } catch (error) {
+    
+  }
 }
