@@ -1,31 +1,29 @@
-// Looking to send emails in production? Check out our Email API/SMTP product!
-import Nodemailer from "nodemailer";
-import { MailtrapTransport } from "mailtrap";
+import nodemailer from 'nodemailer';
+import dotenv from 'dotenv';
 
-const TOKEN = "658baea98b4ef2596d212b01ddc99116";
+dotenv.config();
 
-const transport = Nodemailer.createTransport(
-  MailtrapTransport({
-    token: TOKEN,
-    testInboxId: 3268958,
-  })
-);
+const transport = nodemailer.createTransport({
+  host : process.env.mailtrap_host,
+  port : process.env.mailtrap_port,
+  auth : {
+    user : process.env.mailtrap_user,
+    pass : process.env.mailtrap_pass
+  }
+});
 
-const sender = {
-  address: "hello@example.com",
-  name: "Mailtrap Test",
-};
-const recipients = [
-  "nelsonprox92@gmail.com",
-];
+export const sendVerificationCode = async (recipientEmail, verificationCode) => {
+  const mailOptions = {
+    from : `"InstaHealth Group <${process.env.email_sender}>"`,
+    to : recipientEmail,
+    subject : "Account Verification",
+    text : "This is to verify your account. Please here is your verification code, type in the input in your application the hit verify button",
+    html : `<html><body><div>${verificationCode}</div></body></html>`
+  };
 
-transport
-  .sendMail({
-    from: sender,
-    to: recipients,
-    subject: "You are awesome!",
-    text: "Congrats for sending test email with Mailtrap!",
-    category: "Integration Test",
-    sandbox: true
-  })
-  .then(console.log, console.error);
+  try {
+    transport.sendMail(mailOptions);
+  } catch (error) {
+    console.error(error.message);
+  }
+}

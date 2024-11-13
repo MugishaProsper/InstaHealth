@@ -1,20 +1,11 @@
 import mongoose from "mongoose";
 
-// Define Appointment Request Schema before User Schema
-const appointmentRequestSchema = mongoose.Schema({
-  appointmentId: { type: String, required: true },
-  patientId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  doctorId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  description: { type: String, required: true },
-  isAccepted: { type: Boolean, default: false },
-  date: { type: Date, default: Date.now }
-}, { timestamps: true });
-
 const appointmentSchema = mongoose.Schema({
-  appointmentId: { type: mongoose.Schema.Types.ObjectId, ref: 'appointmentRequest' },
   doctorId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   patientId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  description: { type: mongoose.Schema.Types.ObjectId, ref: 'appointmentRequest' },
+  description: { type: String, required : true },
+  isAccepted : { type : Boolean, default : false },
+  shortNotes : { type : String },
   date: { type: Date, required: true }
 });
 
@@ -50,11 +41,18 @@ const medicalLicenceSchema = mongoose.Schema({
   contentType: { type: String }
 }, { timestamps: true });
 
+const consultationSchema = mongoose.Schema({
+  doctorId : { type : mongoose.Types.ObjectId, ref : 'User' },
+  patientId : { type : mongoose.Types.ObjectId, ref : 'User' },
+  rendez_vous : { type : Date, default : Date.now },
+  isAccepted : { type : Boolean, default : false }
+});
+
 // Export models
 export const License = mongoose.model('License', medicalLicenceSchema);
 export const Certificate = mongoose.model('Certificate', medicalCertificateSchema);
 export const Appointment = mongoose.model('Appointment', appointmentSchema);
-export const AppointmentRequest = mongoose.model('appointmentRequest', appointmentRequestSchema); // Updated naming for consistency
 export const User = mongoose.model('User', userSchema);
+export const Consultation = mongoose.model('Consultations', consultationSchema);
 
-export default { User, Appointment, AppointmentRequest, License };
+export default { User, Appointment, License, Consultation };

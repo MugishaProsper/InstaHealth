@@ -2,6 +2,7 @@ import { User } from '../models/user.models.js';
 import bcrypt from 'bcryptjs'
 import { generateTokenAndSetCookie } from '../plugins/generate.token.js';
 import { generateVerificationCode } from '../plugins/verification.code.js';
+import { sendVerificationCode } from '../config/email.config.js';
 
 export const signup = async (req, res) => {
   const { firstName, lastName, username, email, role, gender, password } = req.body;
@@ -12,26 +13,18 @@ export const signup = async (req, res) => {
     };
     const profilePic = `https://avatar.iran.liara.run/public/job/doctor/${gender.toLowerCase()}`;
     const salt = await bcrypt.genSalt(12);
-    const hashedPassword = await bcrypt.hash(password, salt)
-    const new_user = await User({ firstName, lastName, username, email, password : hashedPassword, profilePicture : profilePic, role : role })
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const verificationCode = await generateVerificationCode(); // Generate verification code
+    const new_user = new User({ firstName, lastName, username, email, password : hashedPassword, profilePicture : profilePic, role : role, verificationCode : verificationCode })
     if(new_user){
       generateTokenAndSetCookie(new_user._id, res);
-
-      /**
-
-      // Sending code to email of the user for verification
-      const verificationCode = generateVerificationCode();
-
-      */
-
-
-
+      await sendVerificationCode(new_user.email, verificationCode);
       await new_user.save();
       return res.status(200).json({ message : `${role} created successfully`, new_user })
     }else{
       res.status(400).json({ message : 'Invalid user data'})
     }
-
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message : 'Server error' })
@@ -69,27 +62,6 @@ export const logout = (req, res) => {
     res.status(500).json({ message : 'Server error' });
   }
 };
-
-export const sendVerificationCode = async (req, res) => {
-  const logging_user = req.user._id;
-  try {
-    const verificationToken = generateVerificationCode();
-
-    const user = await User.findOne(logging_user);
-    if(!user){
-      return res.status(404).json({ message : "User not found" })
-    }
-    
-    // Sending verification code to the email algorithm
-
-
-    user.verificationToken = verificationToken;
-    await user.save();
-    
-  } catch (error) {
-    
-  }
-}
 
 export const verifyCode = async (req, res) => {
   const user_id = req.user._id;

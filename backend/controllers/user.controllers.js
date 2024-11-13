@@ -1,8 +1,7 @@
-import { User, AppointmentRequest, Appointment } from '../models/user.models.js';
+import { User, Appointment, Consultation } from '../models/user.models.js';
 
 
 export const getUsersForSideBar = async (req, res) => {
-
   try {
     const loggedInUserId = req.user._id;
     const filteredUsers = await User.find({ _id : { $ne : loggedInUserId } }).select("-password");
@@ -15,46 +14,33 @@ export const getUsersForSideBar = async (req, res) => {
   }
 };
 
-// User request appointment
 export const requestAppointment = async (req, res) => {
   const userId = req.user._id;
-  const { doctor_id, description } = req.body;
-
-  if(!doctor_id || !description){
-    return res.status(400).json({ message : "please fill all fields" })
-  }
+  const { doctorId } = req.params;
+  const { description } = req.body;
 
   try{
-    const doctor = await User.findById(doctor_id);
+    const doctor = await User.findById({ doctorId });
     if(!doctor){
-      res.status(404).json({ message : "No doctor found" });
-    }
-
-    const newAppointmentRequest = new AppointmentRequest({
-      appointmentId : new mongoose.Types.ObjectId(),
+      return res.status(404).json({ message : "Doctor not found" });
+    };
+    const newAppointment = new Appointment({
       patientId : userId,
-      doctorId : doctor_id,
+      doctorId : doctorId,
       description : description
     });
-
-    await newAppointmentRequest.save();
-
+    await newAppointment.save();
     res.status(200).json({ message : "Appointment requested" });
-    
   } catch (error) {
-
     console.log("Error requesting appointment : ", error);
     res.status(500).json({ message : "Server error" });
-
   }
 };
 
-// Doctor fetching all appointment
-
-export const fetchAppointments = async (req, res) => {
+export const fetchAppointmentRequests = async (req, res) => {
   const userId = req.user._id;
   try{
-    const appointments = await Appointment.findById({ $or : [ { patientId : userId }, { doctorId : userId }] });
+    const appointments = await Appointment.find({ doctorId : userId, isAccepted : false });
     if(!appointments || appointments.length == 0){
       return res.status(404).json({ message : "No Appointments found" })
     }
@@ -65,35 +51,55 @@ export const fetchAppointments = async (req, res) => {
   }
 };
 
-export const profileCompletionStatus = async (req, res) => {
-  const requestingUser = req.user._id;
+export const approveAppointmentRequest = async (req, res) => {
+  const userId = req.user._id;
+  const { appointmentId } = req.params;
+  const { appointment_date, short_note } = req.body;
   try {
-    const user = await User.findOne(requestingUser);
-    if(!user){
-      return res.status(404).json({ message: "Invalid user" })
-    }
-    let profileStatusCount = 0;
-    let role = user.role;
-    if(role == 'doctor'){
-      if(user.medicalCertificate != null){
-        profileStatusCount += 1;
-      };
-      if(user.License != null){
-        profileStatusCount += 1;
-      }
-      if(user.isVerified == true){
-        profileStatusCount += 1;
-      };
-      return res.status(200).json({ profileStatus : (profileStatusCount*100)/3 })
-    }else if(role == 'patient'){
-      if(user.isVerified == true){
-        profileStatusCount += 1;
-      };
-      if(user.insurance != null){
-        profileStatusCount += 1;
-      } 
-    }
+    const appointment = await Appointment.findOne({ doctorId : userId, _id : appointmentId });
+    if(!appointment){
+      return res.status(404).json({ message : "Appointment request not found" });
+    };
+    appointment.isAccepted = true;
+    appointment.appointmentDate = appointment_date;
+    appointment.shortNotes = short_note;
+    await appointment.save();
+    return res.status(200).json({ message : "Appointment approved successfully" });
   } catch (error) {
-    
+    console.log(error.message);
+    return res.status(500).json({ message : "Server error" });
+  }
+};
+
+export const requestConsultation = async (req, res) => {
+  const userId = req.user._id;
+  const { doctorId } = req.params;
+  try {
+    const doctor = await User.findById(doctorId);
+    if(!doctor){
+      return res.status(404).json({ message : "Doctor not found" });
+    };
+    const new_consultation = new Consultation({ doctorId : doctorId, patientId : userId });
+    await new_consultation.save();
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ message : "Server error" })
+  }
+};
+
+export const acceptConsultation = async (req, res) => {
+  const { consultationId } = req.params;
+  const { rendez_vous } = req.body;
+  try {
+    const consultation = await Consultation.findById(consultationId);
+    if(!consultation){
+      return res.status(404).json({ message : "Consultation not found" });
+    }
+    consultation.isAccepted = true;
+    consultation.rendez_vous = rendez_vous;
+    await consultation.save();
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ message : "Server error" });
   }
 }
