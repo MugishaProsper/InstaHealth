@@ -5,8 +5,7 @@ const appointmentSchema = mongoose.Schema({
   patientId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   description: { type: String, required : true },
   isAccepted : { type : Boolean, default : false },
-  shortNotes : { type : String },
-  date: { type: Date, required: true }
+  date: { type: Date, default : Date.now }
 });
 
 const userSchema = mongoose.Schema({
@@ -24,7 +23,7 @@ const userSchema = mongoose.Schema({
   googleId: { type: String },
   profilePicture : { type: String },
   gender : { type: String, enum: ['male', 'female'], default: 'male' },
-  verificationToken : { type : String, default : null }
+  verificationCode : { type : String, default : null }
 }, { timestamps: true });
 
 const medicalCertificateSchema = mongoose.Schema({
