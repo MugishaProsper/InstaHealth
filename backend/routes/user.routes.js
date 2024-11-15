@@ -1,6 +1,7 @@
 import express from 'express';
 import authorize from '../middlewares/auth.middlewares.js';
-import { fetchAppointmentRequests, getUsersForSideBar, requestAppointment } from '../controllers/user.controllers.js';
+import { fetchAppointmentRequests, requestAppointment } from '../controllers/user.controllers.js';
+import { getUsersForSideBar } from '../controllers/message.controllers.js';
 
 const userRoutes = express.Router();
 

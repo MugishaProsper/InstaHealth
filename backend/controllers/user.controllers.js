@@ -1,4 +1,4 @@
-import { Appointment, Consultation } from "../models/user.models";
+import { Appointment, Consultation } from "../models/user.models.js";
 
 export const requestAppointment = async (req, res) => {
   const userId = req.user._id;
@@ -58,6 +58,20 @@ export const approveAppointmentRequest = async (req, res) => {
   }
 };
 
+export const fetchAppointmentRequests = async (req, res) => {
+  const userId = req.user._id;
+  try {
+    const appointments = await Appointment.find({ doctorId : userId }).sort({ isAccepted : false });
+    if(appointments.length === 0){
+      res.status(404).json({ message : "Server error" });
+    }
+    return res.status(200).json(appointments);
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ message : "Server error" });
+  }
+}
+
 export const requestConsultation = async (req, res) => {
   const userId = req.user._id;
   const { doctorId } = req.params;
@@ -67,7 +81,6 @@ export const requestConsultation = async (req, res) => {
     if (!doctor || !patient) {
       return res.status(404).json({ message: "Doctor or Patient not found" });
     }
-
     const new_consultation = new Consultation({ doctorId, patientId: userId });
     await new_consultation.save();
 
