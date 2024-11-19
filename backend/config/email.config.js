@@ -22,7 +22,7 @@ export const sendVerificationCode = async (recipientEmail, verificationCode) => 
   };
 
   try {
-    transport.sendMail(mailOptions);
+    await transport.sendMail(mailOptions);
   } catch (error) {
     console.error(error.message);
   }

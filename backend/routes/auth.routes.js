@@ -3,6 +3,7 @@ import { signup, login, logout } from '../controllers/auth.controllers.js';
 import Certificate from '../models/user.models.js'
 import User from '../models/user.models.js'
 import express from 'express';
+import passport from 'passport';
 
 const router = express.Router();
 
@@ -32,6 +33,11 @@ router.post('certificate/upload', upload.single('file'), async (req, res) => {
         console.error(error.message);
         res.status(500).json({ message : 'Server error' });
     }
+});
+
+router.get('/google', passport.authenticate('google', { scope : ['profile', 'email']}));
+router.get('google/callback', passport.authenticate('google', {failureRedirect : '/login' }), (req, res) => {
+    res.redirect('/'); // Redirect to login page after successful login
 })
 
 export default router;

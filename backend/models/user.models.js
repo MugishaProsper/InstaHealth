@@ -20,7 +20,8 @@ const userSchema = mongoose.Schema({
   isVerified : { type: Boolean, default: false }, // Changed to Boolean
   medicalCertificate : { type: String },
   medicalLicense: { type: String },
-  googleId: { type: String },
+  provider : {type : String, enum : ['google', 'facebook']},
+  providerId: { type: String },
   profilePicture : { type: String },
   gender : { type: String, enum: ['male', 'female'], default: 'male' },
   verificationCode : { type : String, default : null }
