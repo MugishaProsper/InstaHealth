@@ -1,5 +1,10 @@
 import mongoose from "mongoose";
 
+const specialitySchema = mongoose.Schema({
+  person : { type : mongoose.Schema.Types.ObjectId, ref : 'User' },
+  speciality : { type : String, required : true }
+})
+
 const appointmentSchema = mongoose.Schema({
   doctorId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   patientId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
@@ -8,21 +13,23 @@ const appointmentSchema = mongoose.Schema({
   date: { type: Date, default : Date.now }
 });
 
+const roleSchema = mongoose.Schema({
+  person : { type : mongoose.Schema.Types.ObjectId, required : true },
+  type : { type : String, enum : ['doctor', 'patient'], default : 'patient' },
+}, { timestamps : true });
+
 const userSchema = mongoose.Schema({
   firstName : { type: String, required: true },
   lastName : { type: String, required: true },
   username : { type: String },
   email : { type: String, required: true },
   password : { type: String, required: true },
-  role : { type: String, enum: ['doctor', 'patient'], default: 'patient' },
-  appointmentRequests : { type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'appointmentRequest' }], default: undefined },
-  appointments : { type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Appointment' }], default : undefined },
   isVerified : { type: Boolean, default: false }, // Changed to Boolean
-  medicalCertificate : { type: String },
-  medicalLicense: { type: String },
   provider : {type : String, enum : ['google', 'facebook']},
   providerId: { type: String },
-  profilePicture : { type: String },
+  defaultProfilePicture : { type : String, required : true },
+  profilePicture : { type: Buffer },
+  profilePictureContentType : { type : String },
   gender : { type: String, enum: ['male', 'female'], default: 'male' },
   verificationCode : { type : String, default : null }
 }, { timestamps: true });
@@ -49,10 +56,12 @@ const consultationSchema = mongoose.Schema({
 });
 
 // Export models
+export const Speciality = mongoose.model('Specialities', specialitySchema)
 export const License = mongoose.model('License', medicalLicenceSchema);
 export const Certificate = mongoose.model('Certificate', medicalCertificateSchema);
 export const Appointment = mongoose.model('Appointment', appointmentSchema);
 export const User = mongoose.model('User', userSchema);
 export const Consultation = mongoose.model('Consultations', consultationSchema);
+export const Role = mongoose.model('Roles', roleSchema)
 
-export default { User, Appointment, License, Consultation };
+export default { User, Appointment, License, Consultation, Role, Speciality };

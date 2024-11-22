@@ -20,7 +20,6 @@ export const sendVerificationCode = async (recipientEmail, verificationCode) => 
     text : "This is to verify your account. Please here is your verification code, type in the input in your application the hit verify button",
     html : `<html><body><div>${verificationCode}</div></body></html>`
   };
-
   try {
     await transport.sendMail(mailOptions);
   } catch (error) {

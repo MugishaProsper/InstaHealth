@@ -7,18 +7,28 @@ import { notify } from './message.controllers.js';
 
 export const signup = async (req, res) => {
   const { firstName, lastName, username, email, role, gender, password } = req.body;
+
   try {
     const user = await User.findOne({ email });
     if(user){
       return res.status(409).json({ message : `User with ${email} already exists` });
     };
-    const profilePic = `https://avatar.iran.liara.run/public/job/doctor/${gender.toLowerCase()}`;
+    const defaultProfilePic = `https://avatar.iran.liara.run/username?username=${firstName}+${lastName}`;
+
     const salt = await bcrypt.genSalt(12);
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const verificationCode = await generateVerificationCode(); // Generate verification code
-    const new_user = new User({ firstName, lastName, username, email, password : hashedPassword, profilePicture : profilePic, role : role, verificationCode : verificationCode });
+    const new_user = new User({ firstName, lastName, username, email, password : hashedPassword, defaultProfilePicture : defaultProfilePic, role : role, verificationCode : verificationCode });
+    //save new user
     await new_user.save();
+    // check if the user uploaded profile picture
+    if(req.file){
+      new_user.profilePicture = req.file.buffer;
+      new_user.profilePictureContentType = req.file.mimetype;
+      await new_user.save();
+    }
+    //send verification codes and set cookies
     await sendVerificationCode(new_user.email, verificationCode);
     generateTokenAndSetCookie(new_user._id, res);
     return res.status(200).json({ message : `${role} created successfully`, new_user })
@@ -43,7 +53,7 @@ export const login = async (req, res) => {
     return res.status(200).json({ message: 'Login successful', user });
   } catch (error) {
     console.error("Error during login:", error.message);
-    res.status(500).json({ message: "Server error" });
+    return res.status(500).json({ message: "Server error" });
   }
 };
 
