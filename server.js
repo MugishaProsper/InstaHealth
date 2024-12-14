@@ -20,7 +20,7 @@ app.use(cookieParser());
 app.use(CORS())
 
 app.use('/api/auth', router);
-app.use('/api/messages', messageRoutes);
+app.use('/api', messageRoutes);
 app.use('/api/users', userRoutes)
 
 //app.use(express.static(path.join(__dirname, '/frontend/dist')));

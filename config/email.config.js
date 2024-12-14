@@ -25,4 +25,19 @@ export const sendVerificationCode = async (recipientEmail, verificationCode) => 
   } catch (error) {
     console.error(error.message);
   }
-}
+};
+
+export const sendResetPassword = async (recipientEmail, passwordResetCode) => {
+  const mailOptions = {
+    from : `"InstaHealth Group <${process.env.email_sender}>"`,
+    to : recipientEmail,
+    subject : "Password Reset",
+    text : "This is to reset your password. Please here is your verification code, type in the input in your application the hit verify button",
+    html : `<html><body><div>${passwordResetCode}</div></body></html>`
+  };
+  try {
+    await transport.sendMail(mailOptions);
+  } catch (error) {
+    console.error(error.message);
+  }
+};

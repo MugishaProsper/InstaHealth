@@ -33,7 +33,7 @@ export const sendMessage = async (req, res) => {
 
 export const getMessages = async (req, res) => {
   try {
-    const { id: userToChatId } = req.params;
+    const { id : userToChatId } = req.params;
     const senderId = req.user._id;
 
     const conversation = await Conversation.findOne({ participants: { $all: [senderId, userToChatId] } }).populate('messages');
@@ -96,5 +96,21 @@ export const getNofications = async (req, res) => {
   } catch (error) {
     console.log(error.message);
     return res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const getConversations = async (req, res) => {
+  const userId = req.user._id;
+  try {
+    
+    const user = await User.findById(userId);
+    if(!user){
+      return res.status(404).json({ message : 'User not found'});
+    };
+    const conversations = await Conversation.find({ participants : userId }).populate('participants', 'lastName email').populate('messages.sender email').sort({ updatedAt : -1 });
+    return res.status(200).json(conversations);
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ message : 'Server error' })
   }
 }

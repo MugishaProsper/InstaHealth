@@ -1,9 +1,9 @@
 import multer from 'multer';
-import { signup, login, logout } from '../controllers/auth.controllers.js';
+import { signup, login, logout, verifyCode } from '../controllers/auth.controllers.js';
 import Certificate from '../models/user.models.js'
 import User from '../models/user.models.js'
 import express from 'express';
-import passport from 'passport';
+import authorize from '../middlewares/auth.middlewares.js';
 
 const router = express.Router();
 
@@ -11,7 +11,8 @@ const upload = multer({ storage : multer.memoryStorage() })
 
 router.post('/login', login);
 router.post('/register', signup);
-router.post('/logout', logout)
+router.post('/logout', logout);
+router.post('/verify', authorize, verifyCode)
 router.post('certificate/upload', upload.single('file'), async (req, res) => {
     const { userId } = req.params;
     try{
@@ -35,9 +36,5 @@ router.post('certificate/upload', upload.single('file'), async (req, res) => {
     }
 });
 
-router.get('/google', passport.authenticate('google', { scope : ['profile', 'email']}));
-router.get('google/callback', passport.authenticate('google', {failureRedirect : '/login' }), (req, res) => {
-    res.redirect('/'); // Redirect to login page after successful login
-})
 
 export default router;
