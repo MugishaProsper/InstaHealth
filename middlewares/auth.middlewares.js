@@ -11,8 +11,7 @@ const authorize = async (req, res, next) => {
     if (!token) {
       return res.status(401).json({ message: 'No token provided' });
     }
-
-    const decoded = jwt.verify(token, process.env.jwt_secret); // Ensure correct environment variable
+    const decoded = jwt.verify(token, process.env.jwt_secret);
     if (!decoded) {
       return res.status(401).json({ message: 'Invalid token' });
     }
@@ -20,8 +19,7 @@ const authorize = async (req, res, next) => {
     const user = await User.findOne({ _id : decoded.id }).select("-password");
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
-    }
-
+    };
     req.user = user;
     next();
   } catch (error) {
