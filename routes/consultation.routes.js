@@ -8,5 +8,6 @@ consultationRoutes.post('/consultations/:id/request', authorize, requestConsulta
 consultationRoutes.post('/consultations/:id/accept', authorize, acceptConsultation);
 consultationRoutes.post('/consultations/:id/reject', authorize, rejectConsultation);
 consultationRoutes.post('/consultations/:id/cancel', authorize, getConsultationRequests);
+consultationRoutes.get('/consultations', authorize, getConsultationRequests);
 
 export default consultationRoutes;

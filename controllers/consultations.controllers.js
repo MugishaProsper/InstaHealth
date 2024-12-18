@@ -1,6 +1,6 @@
 import { User } from "../models/user.models.js";
 import { notify } from "./message.controllers.js";
-import { Consultation } from "../models/consultation.models.js";
+import { Consultation } from "../models/services.models.js";
 
 export const requestConsultation = async (req, res) => {
   const userId = req.user._id;
@@ -73,9 +73,9 @@ export const rejectConsultation = async (req, res) => {
 export const getConsultationRequests = async (req, res) => {
   const userId = req.user._id;
   try {
-    const consultations = await Consultation.find({ patientId: userId }).sort({ isAccepted: false });
+    const consultations = await Consultation.find({ patientId: userId });
     if (consultations.length === 0) {
-      res.status(404).json({ message: "Server error" });
+      return res.status(200).json({ message: "No consultations found" });
     }
     return res.status(200).json(consultations);
   } catch (error) {

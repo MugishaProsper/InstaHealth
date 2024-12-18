@@ -1,5 +1,5 @@
 import User from '../models/user.models.js';
-import Appointment from '../models/appointment.models.js';
+import Appointment from '../models/services.models.js';
 import { notify } from './message.controllers.js';
 
 

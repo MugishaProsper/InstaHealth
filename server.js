@@ -8,6 +8,8 @@ import messageRoutes from './routes/messages.routes.js';
 import userRoutes from './routes/user.routes.js';
 import CORS from 'cors'
 import kycRoutes from './routes/kyc.routes.js';
+import consultationRoutes from './routes/consultation.routes.js';
+import appointmentRoutes from './routes/appointment.routes.js';
 
 dotenv.config();
 
@@ -23,7 +25,8 @@ app.use(CORS())
 app.use('/api/auth', router);
 app.use('/api/messages', messageRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/kyc', kycRoutes)
+app.use('/api/kyc', kycRoutes);
+app.use('/api/services', consultationRoutes, appointmentRoutes);
 
 //app.use(express.static(path.join(__dirname, '/frontend/dist')));
 
