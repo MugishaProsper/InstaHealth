@@ -7,6 +7,7 @@ import path from 'path'
 import messageRoutes from './routes/messages.routes.js';
 import userRoutes from './routes/user.routes.js';
 import CORS from 'cors'
+import kycRoutes from './routes/kyc.routes.js';
 
 dotenv.config();
 
@@ -20,8 +21,9 @@ app.use(cookieParser());
 app.use(CORS())
 
 app.use('/api/auth', router);
-app.use('/api', messageRoutes);
-app.use('/api/users', userRoutes)
+app.use('/api/messages', messageRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/kyc', kycRoutes)
 
 //app.use(express.static(path.join(__dirname, '/frontend/dist')));
 

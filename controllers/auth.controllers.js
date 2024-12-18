@@ -11,8 +11,8 @@ export const signup = async (req, res) => {
 
   try {
     const user = await User.findOne({ email }).select("-password");
-    if(user){
-      return res.status(409).json({ message : `User with ${email} already exists` });
+    if (user) {
+      return res.status(409).json({ message: `User with ${email} already exists` });
     };
     const defaultProfilePic = `https://avatar.iran.liara.run/username?username=${firstName}+${lastName}`;
 
@@ -20,11 +20,11 @@ export const signup = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const verificationCode = await generateVerificationCode(); // Generate verification code
-    const new_user = new User({ firstName, lastName, username, email, password : hashedPassword, defaultProfilePicture : defaultProfilePic, role : role, verificationCode : verificationCode });
+    const new_user = new User({ firstName, lastName, username, email, password: hashedPassword, defaultProfilePicture: defaultProfilePic, role: role, verificationCode: verificationCode });
     //save new user
     await new_user.save();
     // check if the user uploaded profile picture
-    if(req.file){
+    if (req.file) {
       new_user.profilePicture = req.file.buffer;
       new_user.profilePictureContentType = req.file.mimetype;
       await new_user.save();
@@ -32,10 +32,10 @@ export const signup = async (req, res) => {
     //send verification codes and set cookies
     await sendVerificationCode(new_user.email, verificationCode);
     generateTokenAndSetCookie(new_user._id, res);
-    return res.status(200).json({ message : `${role} created successfully`, new_user })
+    return res.status(200).json({ message: `${role} created successfully`, new_user })
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message : 'Server error' })
+    return res.status(500).json({ message: 'Server error' })
   }
 }
 
@@ -59,12 +59,12 @@ export const login = async (req, res) => {
 };
 
 export const logout = (req, res) => {
-  try{
-      res.cookie("jwt", "", { maxAge : 0 });
-      res.status(200).json({ message : 'Logged out successfully' })
-  }catch(error){
+  try {
+    res.cookie("jwt", "", { maxAge: 0 });
+    res.status(200).json({ message: 'Logged out successfully' })
+  } catch (error) {
     console.error('Error logging out : ', error.message);
-    res.status(500).json({ message : 'Server error' });
+    res.status(500).json({ message: 'Server error' });
   }
 };
 
@@ -73,17 +73,17 @@ export const verifyCode = async (req, res) => {
   const { verification_code } = req.body;
   try {
     const user = await User.findById(userId);
-    if(user.verificationCode != verification_code){
-      return res.status(401).json({ message : "Incorrect verification code"});
+    if (user.verificationCode != verification_code) {
+      return res.status(401).json({ message: "Incorrect verification code" });
     }
     user.isVerified = true;
     await user.save();
     const message = `Your email ${user.email} has been verified successfully`;
     await notify(user._id, message);
-    return res.status(200).json({ message : "Email Verified successfully" });
+    return res.status(200).json({ message: "Email Verified successfully" });
   } catch (error) {
     console.log("Error verifying email : ", error.message);
-    return res.status(500).json({ message : "Server error" });
+    return res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -92,14 +92,14 @@ const resetPassword = async (req, res) => {
 
   try {
     const user = await User.findById(userId);
-    if(!user){
-      return res.status(404).json({ message : "User not found" });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
     }
     const generatedPassword = generateRandomPassword();
     await sendResetPassword(user.email, generatedPassword);
   } catch (error) {
     console.error(error.message);
-    return res.status(500).json({ message : "Server error" });
+    return res.status(500).json({ message: "Server error" });
   }
 };
 export const updatePassword = async (req, res) => {
@@ -107,16 +107,16 @@ export const updatePassword = async (req, res) => {
   const { password } = req.body;
   try {
     const user = await User.findById(userId);
-    if(!user){
-      return res.status(404).json({ message : "User not found" });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
     }
     const salt = await bcrypt.genSalt(12);
     const hashedPassword = await bcrypt.hash(password, salt);
     user.password = hashedPassword;
     await user.save();
-    return res.status(200).json({ message : "Password updated successfully" });
+    return res.status(200).json({ message: "Password updated successfully" });
   } catch (error) {
     console.error(error.message);
-    return res.status(500).json({ message : "Server error" });
+    return res.status(500).json({ message: "Server error" });
   }
 }

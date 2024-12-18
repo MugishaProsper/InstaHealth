@@ -4,8 +4,8 @@ import authorize from '../middlewares/auth.middlewares.js';
 
 const messageRoutes = express.Router();
 
-messageRoutes.get('direct/inbox/:id', authorize, getMessages);
-messageRoutes.post('/direct/inbox/send/:id', authorize, sendMessage);
+messageRoutes.get('/direct/inbox/:id', authorize, getMessages);
+messageRoutes.post('/direct/inbox/:id', authorize, sendMessage);
 messageRoutes.get('/direct/notifications', authorize, getNofications);
 messageRoutes.get('/direct/inbox', authorize, getConversations);
 

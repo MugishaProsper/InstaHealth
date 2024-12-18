@@ -15,6 +15,18 @@ export const sendMessage = async (req, res) => {
     if (!conversation) {
       conversation = await Conversation.create({ participants: [senderId, receiverId] });
     }
+    if(req.file){
+      const newMessage = new Message({ senderId, receiverId, message, attachment: req.file.buffer, attachmentContentType: req.file.mimetype });
+      if (newMessage) {
+        conversation.messages.push(newMessage._id)
+      }
+      await Promise.all([conversation.save(), newMessage.save()]);
+      const receiverSocketId = getReceiverSocketId(receiverId);
+      if (receiverSocketId) {
+        io.to(receiverId).emit('newMessage', newMessage)
+      }
+      return res.status(201).json(newMessage);
+    }
     const newMessage = new Message({ senderId, receiverId, message });
     if (newMessage) {
       conversation.messages.push(newMessage._id)
@@ -33,7 +45,7 @@ export const sendMessage = async (req, res) => {
 
 export const getMessages = async (req, res) => {
   try {
-    const { id : userToChatId } = req.params;
+    const { id: userToChatId } = req.params;
     const senderId = req.user._id;
 
     const conversation = await Conversation.findOne({ participants: { $all: [senderId, userToChatId] } }).populate('messages');
@@ -102,15 +114,15 @@ export const getNofications = async (req, res) => {
 export const getConversations = async (req, res) => {
   const userId = req.user._id;
   try {
-    
+
     const user = await User.findById(userId);
-    if(!user){
-      return res.status(404).json({ message : 'User not found'});
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
     };
-    const conversations = await Conversation.find({ participants : userId }).populate('participants', 'lastName email').populate('messages.sender email').sort({ updatedAt : -1 });
+    const conversations = await Conversation.find({ participants: userId }).populate('messages').sort({ updatedAt: -1 });
     return res.status(200).json(conversations);
   } catch (error) {
     console.log(error.message);
-    return res.status(500).json({ message : 'Server error' })
+    return res.status(500).json({ message: 'Server error' })
   }
 }
